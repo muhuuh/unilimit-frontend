@@ -15,3 +15,10 @@ export default function Home() {
     </div>
   );
 }
+
+export async function getServerSideProps() {
+  console.log("run getServerSideProps()");
+
+  // Pass data to the page via props
+  return { props: { data: "test" } };
+}

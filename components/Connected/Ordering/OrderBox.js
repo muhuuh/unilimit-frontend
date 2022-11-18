@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useInput from "../../../hooks/use-input";
 import useModal from "../../../hooks/use-modal";
 import SelectToken1 from "../Tokens/SelectToken1";
 import SelectToken0 from "../Tokens/SelectToken0";
 import { contractAddresses, abi } from "../../../constants";
 import { useMoralis, useWeb3Contract } from "react-moralis";
+import TokenRatio4 from "../../../pages/TokenRatio4";
 
 const OrderBox = () => {
   const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
@@ -14,9 +15,8 @@ const OrderBox = () => {
 
   const [tokenTicker0, setTokenTicker0] = useState("");
   const [tokenTicker1, setTokenTicker1] = useState("");
-
-  console.log("chainId");
-  console.log(chainId);
+  const [tokenAmount0, setTokenAmount0] = useState(0);
+  const [tokenAmount1, setTokenAmount1] = useState(0);
 
   //Modal
   const {
@@ -73,6 +73,12 @@ const OrderBox = () => {
   }
 
   //interact with SC
+  useEffect(() => {
+    if (isWeb3Enabled) {
+      //updateUI();
+    }
+  }, [isWeb3Enabled]);
+
   const { runContractFunction: enterRaffle } = useWeb3Contract({
     abi: abi,
     contractAddress: contractAddress,
@@ -104,6 +110,7 @@ const OrderBox = () => {
     });
   };
 
+  //submit
   const onSubmitHandler = async (event) => {
     event.preventDefault();
 
@@ -241,6 +248,7 @@ const OrderBox = () => {
           </button>
         </div>
       </form>
+      <TokenRatio4 />
     </div>
   );
 };

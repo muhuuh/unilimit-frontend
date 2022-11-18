@@ -6,7 +6,6 @@ const Connected = () => {
   //Look into getting all transaction from wallet based on indexed events and display them
   return (
     <div className="">
-      <div>You are connected</div>
       <div className="flex  justify-center">
         <OrderBox />
       </div>
