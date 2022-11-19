@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const defaultState = {
-  token0Ticker: "",
-  token0Name: "",
+  token0Ticker: "WETH",
+  token0Name: "Ethereum",
   token0Ratio: 0,
   token0Amount: "",
-  token1Ticker: "",
-  token1Name: "",
+  token1Ticker: "USDC",
+  token1Name: "US Dollar Circle",
   token1Ratio: 0,
   token1Amount: "",
   minBid: 0,

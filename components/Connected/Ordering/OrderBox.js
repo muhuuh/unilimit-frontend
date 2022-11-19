@@ -17,8 +17,8 @@ const OrderBox = () => {
   const contractAddress =
     chainId in contractAddresses ? contractAddresses[chainId][0] : null;
 
-  const [tokenTicker0, setTokenTicker0] = useState("");
-  const [tokenTicker1, setTokenTicker1] = useState("");
+  const [tokenTicker0, setTokenTicker0] = useState("WETH");
+  const [tokenTicker1, setTokenTicker1] = useState("DAI");
   const [minBid, setMinBid] = useState(0);
   const [maxBid, setMaxBid] = useState(0);
   const [tokenAmount0, setTokenAmount0] = useState();

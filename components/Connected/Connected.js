@@ -1,6 +1,6 @@
 import React from "react";
 import OrderBox from "./Ordering/OrderBox";
-import SelectTokens from "./Tokens/SelectToken1";
+//import PriceChart from "./PriceCharts/PriceChart";
 
 const Connected = () => {
   //Look into getting all transaction from wallet based on indexed events and display them
