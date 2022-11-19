@@ -6,8 +6,12 @@ import SelectToken0 from "../Tokens/SelectToken0";
 import { contractAddresses, abi } from "../../../constants";
 import { useMoralis, useWeb3Contract } from "react-moralis";
 import TokenRatio4 from "../../../pages/TokenRatio4";
+import { limitActions } from "../../store/limit-slice";
+import { useDispatch, useSelector } from "react-redux";
 
 const OrderBox = () => {
+  const dispatch = useDispatch();
+  const limitStore = useSelector((state) => state.limit);
   const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
   const chainId = parseInt(chainIdHex).toString();
   const contractAddress =
@@ -15,8 +19,11 @@ const OrderBox = () => {
 
   const [tokenTicker0, setTokenTicker0] = useState("");
   const [tokenTicker1, setTokenTicker1] = useState("");
-  const [tokenAmount0, setTokenAmount0] = useState(0);
-  const [tokenAmount1, setTokenAmount1] = useState(0);
+  const [minBid, setMinBid] = useState(0);
+  const [maxBid, setMaxBid] = useState(0);
+  const [tokenAmount0, setTokenAmount0] = useState();
+  const [tokenAmount1, setTokenAmount1] = useState();
+  const [lastAmountInput, setLastAmountInput] = useState();
 
   //Modal
   const {
@@ -30,13 +37,18 @@ const OrderBox = () => {
     onVisibleHandler: onVisibleHandlerToken1,
   } = useModal();
 
-  //Select Token
+  //Select Token & update tokenticker in store
   const onSelectHandler0 = (tokenTicker) => {
     setTokenTicker0(tokenTicker);
   };
   const onSelectHandler1 = (tokenTicker) => {
     setTokenTicker1(tokenTicker);
   };
+
+  useEffect(() => {
+    const newTickers = { token0: tokenTicker0, token1: tokenTicker1 };
+    dispatch(limitActions.updateTicker(newTickers));
+  }, [tokenTicker0, tokenTicker1]);
 
   //prepare the input fields/checks, etc
   const checkValidity = (input) => {
@@ -67,10 +79,21 @@ const OrderBox = () => {
     amount1Input.enteredInputisValid &&
     maxLimInput.enteredInputisValid &&
     tokenTicker0 != "" &&
-    tokenTicker1 != ""
+    tokenTicker1 != "" &&
+    minLimInput.enteredInput < maxLimInput.enteredInput
   ) {
     formIsValid = true;
   }
+
+  useEffect(() => {
+    if (formIsValid) {
+      const newBids = {
+        minBid: minLimInput.enteredInput,
+        maxBid: maxLimInput.enteredInput,
+      };
+      dispatch(limitActions.updateBids(newBids));
+    }
+  }, [minLimInput.enteredInput, maxLimInput.enteredInput]);
 
   //interact with SC
   useEffect(() => {
@@ -161,6 +184,54 @@ const OrderBox = () => {
     amount1Input.resetInput();
   };
 
+  const amountUserInput0Handler = (event) => {
+    amount0Input.inputChangeHandler(event);
+    const currentInput = amount0Input.enteredInput;
+    console.log("amount0Input.enteredInput");
+    console.log(amount0Input.enteredInput);
+    const token0Ratio = limitStore.token0Ratio;
+
+    setTokenAmount1(currentInput * token0Ratio);
+  };
+  console.log("amount0Input.enteredInput2");
+  console.log(amount0Input.enteredInput);
+
+  //compute tokenAmount1
+  useEffect(() => {
+    const currentInput = amount0Input.enteredInput;
+    const token0Ratio = limitStore.token0Ratio;
+
+    setLastAmountInput("token0");
+    setTokenAmount1(currentInput * token0Ratio);
+  }, [amount0Input.enteredInput]);
+
+  let token0AmountInputFiled;
+  if (lastAmountInput === "token0") {
+    token0AmountInputFiled = amount0Input.enteredInput;
+  } else if (tokenAmount0 > 0) {
+    token0AmountInputFiled = tokenAmount0;
+  } else {
+    token0AmountInputFiled = "";
+  }
+
+  //compute tokenAmount0
+  useEffect(() => {
+    const currentInput = amount1Input.enteredInput;
+    const token1Ratio = limitStore.token1Ratio;
+
+    setLastAmountInput("token1");
+    setTokenAmount0(currentInput * token1Ratio);
+  }, [amount1Input.enteredInput]);
+
+  let token1AmountInputFiled;
+  if (lastAmountInput === "token1") {
+    token1AmountInputFiled = amount1Input.enteredInput;
+  } else if (tokenAmount1 > 0) {
+    token1AmountInputFiled = tokenAmount1;
+  } else {
+    token1AmountInputFiled = "";
+  }
+
   return (
     <div className="">
       <form
@@ -182,10 +253,10 @@ const OrderBox = () => {
               />
             )}
             <input
-              type="text"
+              type="number"
               onChange={amount0Input.inputChangeHandler}
               onBlur={amount0Input.inputBlurHandler}
-              value={amount0Input.enteredInput}
+              value={token0AmountInputFiled}
               className="border-2 rounded-lg shadow-sm h-8 w-48"
             />
           </div>
@@ -202,10 +273,10 @@ const OrderBox = () => {
               />
             )}
             <input
-              type="text"
+              type="number"
               onChange={amount1Input.inputChangeHandler}
               onBlur={amount1Input.inputBlurHandler}
-              value={amount1Input.enteredInput}
+              value={token1AmountInputFiled}
               className="border-2 rounded-lg shadow-sm h-8 w-48"
             />
           </div>
@@ -226,7 +297,7 @@ const OrderBox = () => {
           >
             <label className="">Max limit bid</label>
             <input
-              type="text"
+              type="number"
               onChange={maxLimInput.inputChangeHandler}
               onBlur={maxLimInput.inputBlurHandler}
               value={maxLimInput.enteredInput}

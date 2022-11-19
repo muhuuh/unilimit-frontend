@@ -1,7 +1,10 @@
 import { ChainId, Token, WETH, Fetcher, Route } from "@uniswap/sdk";
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { limitActions } from "../components/store/limit-slice";
 
 const TokenRatio = () => {
+  const dispatch = useDispatch();
   const [tokenRatio, setTokenRatio] = useState({});
   const [pair, setPair] = useState("");
   const DAI = new Token(
@@ -28,7 +31,11 @@ const TokenRatio = () => {
 
       const ratio0 = route.midPrice.toSignificant(6);
       const ratio1 = route.midPrice.invert().toSignificant(6);
+      const newRatio = { token0: ratio0, token1: ratio1 };
       setTokenRatio([ratio0, ratio1]);
+      console.log("newRatio");
+      console.log(newRatio);
+      dispatch(limitActions.updateRatio(newRatio));
     }
   }, [pair]);
 
